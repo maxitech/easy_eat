@@ -3,11 +3,9 @@ import pandas as pd
 import gspread
 from google.oauth2.service_account import Credentials
 import json
-import os
-from dotenv import load_dotenv
 
-load_dotenv()
-creds_json = os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
+
+creds_json = st.secrets['google']['application_credentials']
 creds_dict = json.loads(creds_json)
 
 
@@ -26,6 +24,7 @@ worksheet = sheet.sheet1
 
 values_list = worksheet.get_all_records()
 df = pd.DataFrame(values_list)
+
 
 
 
