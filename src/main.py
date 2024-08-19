@@ -147,7 +147,7 @@ def main():
         
         submitted = st.form_submit_button('Hinzufügen')
         if submitted:
-            if not meal_name and not ingredients and not category and not nutrition and not duration:
+            if not (meal_name and ingredients and category and nutrition and duration):
                 st.error('Bitte füllen Sie die Felder aus!')
             else:
                 add_recipe(worksheet, meal_name, ingredients, category, nutrition, duration)
