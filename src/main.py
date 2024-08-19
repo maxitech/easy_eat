@@ -158,10 +158,13 @@ def main():
     selected_column = st.selectbox('Wähle eine Spalte nach der gefiltert werden soll:', columns, index=None, placeholder='Wähle eine Option')
     if selected_column is not None:
         unique_values = df[selected_column].unique()
-        selected_value = st.selectbox(f'Filter nach {selected_column}:', unique_values)
-        filtered_df = df[df[selected_column] == selected_value]
-        st.write(filtered_df)
-
+        selected_value = st.selectbox(f'Filter nach {selected_column}:', unique_values, index=None)
+        if selected_value:
+            filtered_df = df[df[selected_column] == selected_value]
+            st.write(filtered_df)
+        else:
+            st.warning('Bitte wähle einen zweiten Filter!')
+            
 
 if __name__ == '__main__':
     main()
