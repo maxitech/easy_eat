@@ -194,7 +194,7 @@ def main():
                 add_recipe(worksheet, meal_name, ingredients, category, nutrition, duration)
 
 
-    delete_input = st.selectbox('Wählen Sie den Namen des Rezeptes, welches Sie löchen möchten:', df['Gericht'], index=None, placeholder='Wähle das Rezept', help='Am PC können Sie auch in das Feld schreiben um zu suchen')
+    delete_input = st.selectbox('Wählen Sie den Namen des Rezeptes, welches Sie löschen möchten:', df['Gericht'], index=None, placeholder='Wähle das Rezept', help='Am PC können Sie auch in das Feld schreiben um zu suchen')
     
     if df.empty:
         st.warning('Keine Rezepte zum Löschen, fügen Sie erst welche hinzu.')
