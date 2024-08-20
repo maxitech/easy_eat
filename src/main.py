@@ -38,8 +38,13 @@ def load_sheet_data(sheet_id):
     client = gspread.authorize(creds)
     sheet = client.open_by_key(sheet_id)
     worksheet = sheet.sheet1
-    values_list = worksheet.get_all_records()
-    return pd.DataFrame(values_list), worksheet
+    values_list = worksheet.get_all_values()
+    
+    if values_list:
+        df = pd.DataFrame(values_list[1:], columns=values_list[0])
+    else:
+        df = pd.DataFrame(columns=worksheet.row_values(1))
+    return df, worksheet
 
 
 def search_recipes(df, search_params):
@@ -105,6 +110,42 @@ def add_recipe(worksheet, meal_name, ingredients, category, nutrition, duration)
         return False
 
 
+def delete_recipe(worksheet, meal_name):
+    '''
+    Deletes a recipe from the Google Sheet based on the meal name.
+
+    This function searches for the row that contains the specified meal name and deletes it 
+    from the Google Sheet.
+
+        Params:
+            worksheet (gspread.models.Worksheet): The worksheet object representing the Google Sheet.
+            meal_name (str): The name of the recipe to delete.
+
+        Returns:
+            bool: True if the recipe was successfully deleted, False if the recipe was not found or an error occurred.
+    '''
+    try:
+        cell = worksheet.find(meal_name)
+        
+        if cell: 
+            worksheet.delete_rows(cell.row)
+            st.success('Das Rezept wurde erfolgreich gelöscht!')
+            return True
+        else:
+            st.error('Das Rezept konnte nicht gelöscht werden, überprüfen Sie ihre Eingabe!')  
+            return False
+        
+    except gspread.exceptions.APIError as api_error:
+        st.error(f"API Fehler aufgetreten: {api_error}")
+        return False
+    except gspread.exceptions.RequestError as request_error:
+        st.error(f"Netzwerkfehler aufgetreten: {request_error}")
+        return False
+    except Exception as error:
+        st.error(f'Ein unerwarteter Fehler ist aufgetreten! {error}')
+        return False
+
+
 def main():
     '''
      Main function that loads the Google Sheet data, displays a preview, and provides search and filter functionality.
@@ -130,7 +171,7 @@ def main():
         filtered_df = search_recipes(df, search_input)
         
         if not filtered_df.empty:
-            st.subheader(f"Rezepte mit '{search_input}:")
+            st.subheader(f"Rezepte mit '{search_input}':")
             st.write(filtered_df)
         else:
             st.write(f"Keine Rezepte gefunden mit '{search_input}'.")
@@ -151,8 +192,22 @@ def main():
                 st.error('Bitte füllen Sie die Felder aus!')
             else:
                 add_recipe(worksheet, meal_name, ingredients, category, nutrition, duration)
-                
-                     
+
+
+    delete_input = st.selectbox('Wählen Sie den Namen des Rezeptes, welches Sie löchen möchten:', df['Gericht'], index=None, placeholder='Wähle das Rezept', help='Am PC können Sie auch in das Feld schreiben um zu suchen')
+    
+    if df.empty:
+        st.warning('Keine Rezepte zum Löschen, fügen Sie erst welche hinzu.')
+    if delete_input:
+        value_to_delete = search_recipes(df, delete_input)
+        if not value_to_delete.empty:
+            st.write(value_to_delete)
+            if st.button('Löschen'):    
+                delete_recipe(worksheet, delete_input) 
+        else:
+            st.write('Kein Rezept gefunden, bitte überprüfe deine Eingabe!')
+             
+                       
     st.subheader('Optional:')
     columns = df.columns.tolist()
     selected_column = st.selectbox('Wähle eine Spalte nach der gefiltert werden soll:', columns, index=None, placeholder='Wähle eine Option')
