@@ -164,3 +164,4 @@ cython_debug/
 # custom 
 credentials.json
 secrets.toml
+config.yaml

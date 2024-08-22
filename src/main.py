@@ -1,15 +1,38 @@
 import streamlit as st
+import streamlit_authenticator as stauth
 import pandas as pd
 import gspread
 import gspread.exceptions
 from google.oauth2.service_account import Credentials
+
 import json
+import yaml
+from yaml.loader import SafeLoader
+
+
 
 
 SCOPES = [
     'https://www.googleapis.com/auth/spreadsheets'
 ]
 SHEET_ID = '150FEJZreTXRc3NrDRhSouMDFdAVfuQFxJ5NnRzPrm98'
+
+
+def authenticate_user():
+    with open('../config.yaml') as file:
+        config = yaml.load(file, Loader=SafeLoader)
+
+    # Pre-hashing all plain text passwords once
+    # print(stauth.Hasher(['password']).generate())
+
+    authenticator = stauth.Authenticate(
+        config['credentials'],
+        config['cookie']['name'],
+        config['cookie']['key'],
+        config['cookie']['expiry_days'],
+        config['pre-authorized']
+    )
+    return authenticator
 
 
 def load_credentials():
@@ -222,4 +245,14 @@ def main():
             
 
 if __name__ == '__main__':
-    main()
+    authenticator = authenticate_user()
+    authenticator.login(location='sidebar')
+    if st.session_state['authentication_status']:
+        main()
+        authenticator.logout(location='sidebar')
+        st.write(f'Welcome *{st.session_state["name"]}*')
+        st.title('Some content')
+    elif st.session_state['authentication_status'] is False:
+        st.error('Username/password is incorrect')
+    elif st.session_state['authentication_status'] is None:
+        st.warning('Please enter your username and password')
