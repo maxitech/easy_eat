@@ -8,7 +8,7 @@ from google.oauth2.service_account import Credentials
 import json
 import yaml
 from yaml.loader import SafeLoader
-
+from uuid import uuid4
 
 
 
@@ -167,7 +167,7 @@ def delete_recipe(worksheet, meal_name):
     except Exception as error:
         st.error(f'Ein unerwarteter Fehler ist aufgetreten! {error}')
         return False
-
+    
 
 def main():
     '''
@@ -244,15 +244,19 @@ def main():
             st.warning('Bitte wähle einen zweiten Filter!')
             
 
-if __name__ == '__main__':
+if __name__ == '__main__':    
+    # ---------- AUTHENTICATION ----------
+    if 'uuid_key' not in st.session_state:
+        st.session_state['uuid_key'] = str(uuid4())
+    uuid_key = st.session_state['uuid_key']
+    
     authenticator = authenticate_user()
-    authenticator.login(location='sidebar')
+    authenticator.login(location='main', fields={'Form name':'Anmeldung', 'Username':'Nutzername', 'Password':'Passwort', 'Login':'Anmelden'}, key=uuid_key)
     if st.session_state['authentication_status']:
+        st.sidebar.write(f'Wilkommen {st.session_state["name"]}')
+        authenticator.logout(button_name='Abmelden', location='sidebar', key=uuid_key)
         main()
-        authenticator.logout(location='sidebar')
-        st.write(f'Welcome *{st.session_state["name"]}*')
-        st.title('Some content')
     elif st.session_state['authentication_status'] is False:
-        st.error('Username/password is incorrect')
+        st.error('Username/Passwort ist falsch')
     elif st.session_state['authentication_status'] is None:
-        st.warning('Please enter your username and password')
+        st.warning('Bitte gebe deine Anmeldedaten ein')
