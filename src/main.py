@@ -49,6 +49,27 @@ def authenticate_user():
         config['pre-authorized']
     )
     return authenticator, config
+    
+
+def handle_auth_error(config, status):
+    """
+    Handles authentication errors by showing the appropriate message and performing actions like
+    updating the configuration and registering a new user.
+
+    Parameters
+    ----------
+    config: dict
+        The configuration data to be used for updating and registration.
+    status: Optional[bool]
+        The status of authentication, where False indicates incorrect credentials and None indicates no input.
+    """
+    if status is False:
+        st.error('Username/Passwort ist falsch')
+    elif status is None:
+        st.warning('Bitte gebe deine Anmeldedaten ein')
+    
+    update_config(config)
+    registrate_new_user(config)
 
 
 def reset_pw(config):
@@ -328,11 +349,5 @@ if __name__ == '__main__':
         reset_pw(config)
         update_config(config)
         main()
-    elif st.session_state['authentication_status'] is False:
-        st.error('Username/Passwort ist falsch')
-        update_config(config)
-        registrate_new_user(config)
-    elif st.session_state['authentication_status'] is None:
-        st.warning('Bitte gebe deine Anmeldedaten ein')
-        update_config(config)
-        registrate_new_user(config)
+    else:
+        handle_auth_error(config, st.session_state['authentication_status'])
