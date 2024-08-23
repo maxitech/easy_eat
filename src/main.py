@@ -10,6 +10,8 @@ import yaml
 from yaml.loader import SafeLoader
 from uuid import uuid4
 
+from utils import update_config
+
 
 
 SCOPES = [
@@ -32,7 +34,16 @@ def authenticate_user():
         config['cookie']['expiry_days'],
         config['pre-authorized']
     )
-    return authenticator
+    return authenticator, config
+
+
+def reset_pw(config):
+    try:
+        if authenticator.reset_password(st.session_state['username'], location='sidebar'):
+            update_config(config)
+            st.sidebar.success('Passwort wurde erfolgreich geändert')
+    except Exception as e:
+        st.sidebar.error(e)
 
 
 def load_credentials():
@@ -250,11 +261,12 @@ if __name__ == '__main__':
         st.session_state['uuid_key'] = str(uuid4())
     uuid_key = st.session_state['uuid_key']
     
-    authenticator = authenticate_user()
+    authenticator, config = authenticate_user()
     authenticator.login(location='main', fields={'Form name':'Anmeldung', 'Username':'Nutzername', 'Password':'Passwort', 'Login':'Anmelden'}, key=uuid_key)
     if st.session_state['authentication_status']:
         st.sidebar.write(f'Wilkommen {st.session_state["name"]}')
         authenticator.logout(button_name='Abmelden', location='sidebar', key=uuid_key)
+        reset_pw(config)
         main()
     elif st.session_state['authentication_status'] is False:
         st.error('Username/Passwort ist falsch')
