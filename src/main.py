@@ -21,6 +21,20 @@ SHEET_ID = '150FEJZreTXRc3NrDRhSouMDFdAVfuQFxJ5NnRzPrm98'
 
 
 def authenticate_user():
+    """
+    Initializes the authentication system using configuration settings from a YAML file.
+
+    This function loads the authentication configuration from the `config.yaml` file and sets up
+    the authentication system using the `stauth.Authenticate` class. It returns the authenticator
+    object and the loaded configuration.
+
+    Returns
+    -------
+    Tuple
+        A tuple containing:
+        - `authenticator`: An instance of the `stauth.Authenticate` class used for authentication.
+        - `config`: The configuration dictionary loaded from the YAML file.
+    """
     with open('../config.yaml') as file:
         config = yaml.load(file, Loader=SafeLoader)
 
@@ -38,8 +52,26 @@ def authenticate_user():
 
 
 def reset_pw(config):
+    """
+    Handles the password reset process for the user.
+
+    This function attempts to reset the user's password using the `authenticator` instance. If the
+    reset is successful, it updates the configuration and displays a success message in the sidebar.
+    If an error occurs, it displays an error message in the sidebar.
+
+    Parameters
+    ----------
+    config: dict
+        The configuration dictionary used for updating and registration.
+
+    Raises
+    ------
+    Exception
+        Any exception that occurs during the password reset process will be caught and displayed as an error message.
+    """
+
     try:
-        if authenticator.reset_password(st.session_state['username'], location='sidebar'):
+        if authenticator.reset_password(st.session_state['username'], location='sidebar', fields={'Form name':'Passwort zurückseten', 'Current password':'Aktuelles Passwort', 'New password':'Neues Passwort', 'Repeat password': 'Passwort bestätigen', 'Reset':'Zurücksetzen'}):
             update_config(config)
             st.sidebar.success('Passwort wurde erfolgreich geändert')
     except Exception as e:
@@ -47,6 +79,23 @@ def reset_pw(config):
 
 
 def registrate_new_user(config):
+    """
+    Registers a new user in the system.
+
+    This function attempts to register a new user using the `authenticator` instance. If the registration
+    is successful, it updates the configuration and displays a success message in the sidebar. If an error
+    occurs, it displays an error message in the sidebar.
+
+    Parameters
+    ----------
+    config: dict
+        The configuration dictionary used for updating and registration.
+
+    Raises
+    ------
+    Exception
+        Any exception that occurs during the user registration process will be caught and displayed as an error message.
+    """
     try:
         email_of_registered_user, username_of_registered_user, name_of_registered_user = authenticator.register_user(pre_authorization=False, location='sidebar', fields= {'Form name':'Registrierung', 'Email':'Email', 'Username':'Benutzername', 'Password':'Passwort', 'Repeat password':'Passwort bestätigen', 'Register':'Registrieren'})
         if email_of_registered_user:
