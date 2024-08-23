@@ -46,6 +46,16 @@ def reset_pw(config):
         st.sidebar.error(e)
 
 
+def registrate_new_user(config):
+    try:
+        email_of_registered_user, username_of_registered_user, name_of_registered_user = authenticator.register_user(pre_authorization=False, location='sidebar', fields= {'Form name':'Registrierung', 'Email':'Email', 'Username':'Benutzername', 'Password':'Passwort', 'Repeat password':'Passwort bestätigen', 'Register':'Registrieren'})
+        if email_of_registered_user:
+            st.sidebar.success('Anmeldung erfolgreich! Sie können sich jetzt anmelden')
+            update_config(config)
+    except Exception as e:
+        st.sidebar.error(e)
+
+
 def load_credentials():
     '''
     Loads google API login data from steamlit-secrets TOML file.
@@ -267,8 +277,13 @@ if __name__ == '__main__':
         st.sidebar.write(f'Wilkommen {st.session_state["name"]}')
         authenticator.logout(button_name='Abmelden', location='sidebar', key=uuid_key)
         reset_pw(config)
+        update_config(config)
         main()
     elif st.session_state['authentication_status'] is False:
         st.error('Username/Passwort ist falsch')
+        update_config(config)
+        registrate_new_user(config)
     elif st.session_state['authentication_status'] is None:
         st.warning('Bitte gebe deine Anmeldedaten ein')
+        update_config(config)
+        registrate_new_user(config)
