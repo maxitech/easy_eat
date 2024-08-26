@@ -1,45 +1,80 @@
-import streamlit as st
-import streamlit_authenticator as stauth
-import pandas as pd
 import gspread
 import gspread.exceptions
 from google.oauth2.service_account import Credentials
+import pandas as pd
+import streamlit as st
+import streamlit_authenticator as stauth
 
 import json
-import yaml
-from yaml.loader import SafeLoader
 from uuid import uuid4
-
-from utils import update_config
-
+import yaml
 
 
 SCOPES = [
     'https://www.googleapis.com/auth/spreadsheets'
 ]
-SHEET_ID = '150FEJZreTXRc3NrDRhSouMDFdAVfuQFxJ5NnRzPrm98'
+
+
+# def update_config(config):
+#     st.write('update run', config)
+#     df, worksheet = get_data_from_db()
+#     users = config.get("usernames", {})
+
+#     data_to_update = []
+#     for username, details in users.items():
+#         user_info = {
+#             "username": username,
+#             "email": details.get("email"),
+#             "logged_in": details.get("logged_in"),
+#             "name": details.get("name"),
+#             "password": details.get("password")
+#         }
+#         data_to_update.append(user_info)
+    
+#     new_df = pd.DataFrame(data_to_update)
+
+#     # Vergleich der DataFrames
+#     if df.equals(new_df):
+#         st.write('Keine Änderungen erkannt, kein Update erforderlich')
+#     else:
+#         # Bestehende Daten löschen und neues DataFrame in das Worksheet schreiben
+#         worksheet.clear()  # Löscht den Inhalt des aktuellen Worksheets
+
+#         # Überschrift hinzufügen
+#         worksheet.append_row(list(new_df.columns))
+
+#         # Daten hinzufügen
+#         for row in new_df.values.tolist():
+#             worksheet.append_row(row)
+        
+#         st.write('Sheet wurde aktualisiert')
 
 
 def authenticate_user():
-    """
-    Initializes the authentication system using configuration settings from a YAML file.
+    SHEET_ID = '1_nJOUU06XiRuq0W-d1kaY7e5oKa1tlXLettEh_T_xh8'
+    secrets = st.secrets['google']['db_credentials']
 
-    This function loads the authentication configuration from the `config.yaml` file and sets up
-    the authentication system using the `stauth.Authenticate` class. It returns the authenticator
-    object and the loaded configuration.
+    df, worksheet = load_sheet_data(SHEET_ID, secrets)
+    st.write(df)
 
-    Returns
-    -------
-    Tuple
-        A tuple containing:
-        - `authenticator`: An instance of the `stauth.Authenticate` class used for authentication.
-        - `config`: The configuration dictionary loaded from the YAML file.
-    """
+    credentials = {'usernames': {}}
+    for _, row in df.iterrows():
+        username = row['username']
+        credentials['usernames'][username] = {
+            'email': row['email'],
+            'failed_login_attempts': row.get('failed_login_attempts', 0),
+            'logged_in': row['logged_in'],
+            'name': row['name'],
+            'password': row['password']
+        }
+        
     with open('../config.yaml') as file:
-        config = yaml.load(file, Loader=SafeLoader)
-
+        config = yaml.load(file, Loader=yaml.SafeLoader)
+    
+    config['credentials'] = credentials
+    st.write(config)  
     # Pre-hashing all plain text passwords once
-    # print(stauth.Hasher(['password']).generate())
+    # Hasher.hash_passwords(config['credentials'])
 
     authenticator = stauth.Authenticate(
         config['credentials'],
@@ -48,97 +83,46 @@ def authenticate_user():
         config['cookie']['expiry_days'],
         config['pre-authorized']
     )
+
     return authenticator, config
     
 
 def handle_auth_error(config, status):
-    """
-    Handles authentication errors by showing the appropriate message and performing actions like
-    updating the configuration and registering a new user.
-
-    Parameters
-    ----------
-    config: dict
-        The configuration data to be used for updating and registration.
-    status: Optional[bool]
-        The status of authentication, where False indicates incorrect credentials and None indicates no input.
-    """
     if status is False:
         st.error('Username/Passwort ist falsch')
     elif status is None:
         st.warning('Bitte gebe deine Anmeldedaten ein')
     
-    update_config(config)
+    # update_config(config)
     registrate_new_user(config)
 
 
 def reset_pw(config):
-    """
-    Handles the password reset process for the user.
-
-    This function attempts to reset the user's password using the `authenticator` instance. If the
-    reset is successful, it updates the configuration and displays a success message in the sidebar.
-    If an error occurs, it displays an error message in the sidebar.
-
-    Parameters
-    ----------
-    config: dict
-        The configuration dictionary used for updating and registration.
-
-    Raises
-    ------
-    Exception
-        Any exception that occurs during the password reset process will be caught and displayed as an error message.
-    """
-
     try:
         if authenticator.reset_password(st.session_state['username'], location='sidebar', fields={'Form name':'Passwort zurückseten', 'Current password':'Aktuelles Passwort', 'New password':'Neues Passwort', 'Repeat password': 'Passwort bestätigen', 'Reset':'Zurücksetzen'}):
-            update_config(config)
+            # update_config(config)
             st.sidebar.success('Passwort wurde erfolgreich geändert')
     except Exception as e:
         st.sidebar.error(e)
 
 
 def registrate_new_user(config):
-    """
-    Registers a new user in the system.
-
-    This function attempts to register a new user using the `authenticator` instance. If the registration
-    is successful, it updates the configuration and displays a success message in the sidebar. If an error
-    occurs, it displays an error message in the sidebar.
-
-    Parameters
-    ----------
-    config: dict
-        The configuration dictionary used for updating and registration.
-
-    Raises
-    ------
-    Exception
-        Any exception that occurs during the user registration process will be caught and displayed as an error message.
-    """
     try:
-        email_of_registered_user, username_of_registered_user, name_of_registered_user = authenticator.register_user(pre_authorization=False, location='sidebar', fields= {'Form name':'Registrierung', 'Email':'Email', 'Username':'Benutzername', 'Password':'Passwort', 'Repeat password':'Passwort bestätigen', 'Register':'Registrieren'})
+        email_of_registered_user, username_of_registered_user, name_of_registered_user = authenticator.register_user(pre_authorization=False, location='sidebar', fields= {'Form name':'Registrierung', 'Email':'Email', 'Username':'Benutzername', 'Password':'Passwort', 'Repeat password':'Passwort bestätigen', 'Register':'Registrieren'}, captcha=False)
         if email_of_registered_user:
-            st.sidebar.success('Anmeldung erfolgreich! Sie können sich jetzt anmelden')
-            update_config(config)
+            st.sidebar.success('Registrierung erfolgreich! Sie können sich jetzt anmelden')
+            # update_config(config) 
     except Exception as e:
         st.sidebar.error(e)
 
 
-def load_credentials():
-    '''
-    Loads google API login data from steamlit-secrets TOML file.
-    
-        Returns: 
-            google.oauth2.service_account.Credentials: A Credentials object that contains the credentials for accessing Google APIs.
-    '''
-    creds_json = st.secrets['google']['application_credentials']
+def load_credentials(secrets):
+    creds_json = secrets
     creds_dict = json.loads(creds_json)
     return Credentials.from_service_account_info(creds_dict, scopes=SCOPES)
 
 
-def load_sheet_data(sheet_id):
+def load_sheet_data(sheet_id, secrets):
     '''
     Loads data from a Google Sheet and returns it as a Pandas DataFrame.
 
@@ -148,7 +132,7 @@ def load_sheet_data(sheet_id):
         Returns:
             pandas.DataFrame: A DataFrame containing the data from the Google Sheet.
     '''
-    creds = load_credentials()
+    creds = load_credentials(secrets)
     client = gspread.authorize(creds)
     sheet = client.open_by_key(sheet_id)
     worksheet = sheet.sheet1
@@ -272,7 +256,10 @@ def main():
         - Allows user to add his own recepis to the sheet(db)
         - Provides an optional filter to select and display recipes based on a specific column value.
     '''
-    df, worksheet = load_sheet_data(SHEET_ID)
+    SHEET_ID = '150FEJZreTXRc3NrDRhSouMDFdAVfuQFxJ5NnRzPrm98'
+    secrets = st.secrets['google']['application_credentials']
+    
+    df, worksheet = load_sheet_data(SHEET_ID, secrets)
     
     st.title('Easy Eat')
     st.subheader('Rezeptvorschau')
@@ -335,7 +322,7 @@ def main():
             st.warning('Bitte wähle einen zweiten Filter!')
             
 
-if __name__ == '__main__':    
+if __name__ == '__main__':  
     # ---------- AUTHENTICATION ----------
     if 'uuid_key' not in st.session_state:
         st.session_state['uuid_key'] = str(uuid4())
@@ -343,11 +330,15 @@ if __name__ == '__main__':
     
     authenticator, config = authenticate_user()
     authenticator.login(location='main', fields={'Form name':'Anmeldung', 'Username':'Nutzername', 'Password':'Passwort', 'Login':'Anmelden'}, key=uuid_key)
+    st.write(st.session_state['username'])
+    
+    
     if st.session_state['authentication_status']:
         st.sidebar.write(f'Wilkommen {st.session_state["name"]}')
         authenticator.logout(button_name='Abmelden', location='sidebar', key=uuid_key)
-        reset_pw(config)
-        update_config(config)
-        main()
+        # reset_pw(config)
+        # update_config(config)
+        # main()
+        st.title('Wilkommen')
     else:
         handle_auth_error(config, st.session_state['authentication_status'])
