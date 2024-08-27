@@ -16,21 +16,37 @@ SCOPES = [
 
 
 def load_credentials(secrets):
+    """
+    Loads Google API credentials from a JSON string.
+
+    Params:
+        secrets (str): A JSON string containing the service account credentials.
+
+    Returns:
+        google.oauth2.service_account.Credentials: The credentials object used to authenticate with Google APIs.
+    """
     creds_json = secrets
     creds_dict = json.loads(creds_json)
     return Credentials.from_service_account_info(creds_dict, scopes=SCOPES)
 
 
 def load_sheet_data(sheet_id, secrets):
-    '''
-    Loads data from a Google Sheet and returns it as a Pandas DataFrame.
+    """
+    Loads data from a Google Sheet and returns it as a Pandas DataFrame along with the worksheet object.
 
-        Params:
-            sheet_id (str): The ID of the Google Sheet to load data from.
+    This function uses the provided Google Sheets API credentials to authenticate and retrieve data from the specified
+    Google Sheet. The data is returned as a Pandas DataFrame, with the first row used as the header. The function also
+    returns the worksheet object for further operations.
 
-        Returns:
-            pandas.DataFrame: A DataFrame containing the data from the Google Sheet.
-    '''
+    Params:
+        sheet_id (str): The ID of the Google Sheet to load data from.
+        secrets (str): A JSON string containing the service account credentials.
+
+    Returns:
+        tuple: A tuple containing:
+            - pandas.DataFrame: A DataFrame containing the data from the Google Sheet.
+            - gspread.models.Worksheet: The worksheet object representing the Google Sheet.
+    """
     creds = load_credentials(secrets)
     client = gspread.authorize(creds)
     sheet = client.open_by_key(sheet_id)
@@ -45,11 +61,18 @@ def load_sheet_data(sheet_id, secrets):
 
 
 def authenticate_user():
+    """
+    Authenticates a user using credentials stored in a Google Sheet.
+
+    Returns:
+        stauth.Authenticate: The Streamlit Authenticator object for handling user authentication.
+        dict: The configuration dictionary used by the authenticator.
+        gspread.models.Worksheet: The worksheet object representing the Google Sheet.
+    """
     SHEET_ID = '1_nJOUU06XiRuq0W-d1kaY7e5oKa1tlXLettEh_T_xh8'
     secrets = st.secrets['google']['db_credentials']
 
     df, worksheet = load_sheet_data(SHEET_ID, secrets)
-    st.write(df)
 
     credentials = {'usernames': {}}
     for _, row in df.iterrows():
@@ -79,6 +102,16 @@ def authenticate_user():
 
 
 def registrate_new_user(config, worksheet):
+    """
+    Registers a new user and updates the Google Sheet with their details.
+
+    Params:
+        config (dict): The configuration dictionary containing user credentials.
+        worksheet (gspread.models.Worksheet): The worksheet object representing the Google Sheet.
+
+    Returns:
+        None
+    """
     try:
         email_of_registered_user, username_of_registered_user, name_of_registered_user = authenticator.register_user(
             pre_authorization=False, 
@@ -112,13 +145,23 @@ def registrate_new_user(config, worksheet):
                 password,
             ]
             worksheet.append_row(new_data)
-            st.write(f"Added new row for user {username_of_registered_user}")
 
     except Exception as e:
         st.sidebar.error(e)
 
 
-def update_config(config, search, worksheet):
+def update_config(config, curr_user, worksheet):
+    """
+    Updates the configuration and Google Sheet with new user data.
+
+    Params:
+        config (dict): The configuration dictionary containing user credentials.
+        search (str): The username of the user whose data is to be updated.
+        worksheet (gspread.models.Worksheet): The worksheet object representing the Google Sheet.
+
+    Returns:
+        None
+    """
     users = config['credentials']['usernames']
     
     data_to_update = []
@@ -134,15 +177,15 @@ def update_config(config, search, worksheet):
     
     df = pd.DataFrame(data_to_update)
     
-    filtered_df = df[df['username'] == search]
+    filtered_df = df[df['username'] == curr_user]
     
     if not filtered_df.empty:
         data = worksheet.get_all_records()
         for i, row in enumerate(data):
-            if row['username'] == search:
+            if row['username'] == curr_user:
                 row_index = i + 2
                 new_data = [
-                    search,
+                    curr_user,
                     filtered_df.iloc[0]['email'],  
                     filtered_df.iloc[0]['name'], 
                     filtered_df.iloc[0]['password']  
@@ -158,6 +201,17 @@ def update_config(config, search, worksheet):
   
 
 def handle_auth_error(config, status, worksheet):
+    """
+    Handles authentication errors and prompts user registration if necessary.
+
+    Params:
+        config (dict): The configuration dictionary containing user credentials.
+        status (bool or None): The authentication status. False indicates a failure, None indicates no attempt yet.
+        worksheet (gspread.models.Worksheet): The worksheet object representing the Google Sheet.
+
+    Returns:
+        None
+    """
     if status is False:
         st.error('Username/Passwort ist falsch')
     elif status is None:
@@ -166,7 +220,18 @@ def handle_auth_error(config, status, worksheet):
     registrate_new_user(config, worksheet)
 
 
-def reset_pw(config, search, worksheet):
+def reset_pw(config, curr_user, worksheet):
+    """
+    Resets a user's password and updates the Google Sheet.
+
+    Params:
+        config (dict): The configuration dictionary containing user credentials.
+        search (str): The username of the user whose password is to be reset.
+        worksheet (gspread.models.Worksheet): The worksheet object representing the Google Sheet.
+
+    Returns:
+        None
+    """
     try:
         if authenticator.reset_password(
             st.session_state['username'], 
@@ -174,23 +239,23 @@ def reset_pw(config, search, worksheet):
             fields={'Form name':'Passwort zurückseten', 
                     'Current password':'Aktuelles Passwort',
                     'New password':'Neues Passwort',                                            'Repeat password':'Passwort bestätigen', 'Reset':'Zurücksetzen'}):
-            update_config(config, search, worksheet)
+            update_config(config, curr_user, worksheet)
             st.sidebar.success('Passwort wurde erfolgreich geändert')
     except Exception as e:
         st.sidebar.error(e)
 
 
 def search_recipes(df, search_params):
-    '''
+    """
     Searches for recipes in the DataFrame that match the given search parameters.
 
-        Params:
-            df (pandas.DataFrame): The DataFrame containing recipe data.
-            search_params (str): A string of search terms separated by spaces.
+    Params:
+        df (pandas.DataFrame): The DataFrame containing recipe data.
+        search_params (str): A string of search terms separated by spaces.
 
-        Returns:
-            pandas.DataFrame: A DataFrame containing the recipes that match the search terms.
-    '''
+    Returns:
+        pandas.DataFrame: A DataFrame containing the recipes that match the search terms.
+    """
     search_terms = search_params.split()
     
     for term in search_terms:
@@ -199,7 +264,7 @@ def search_recipes(df, search_params):
 
 
 def add_recipe(worksheet, meal_name, ingredients, category, nutrition, duration):
-    '''
+    """
     Adds a new recipe to the Google Sheet and handles potential errors.
 
     This function takes the details of a recipe, formats them into a dictionary, 
@@ -207,17 +272,17 @@ def add_recipe(worksheet, meal_name, ingredients, category, nutrition, duration)
     It also provides error handling for API and network-related issues, 
     and gives feedback to the user via Streamlit.
 
-        Params:
-            worksheet (gspread.models.Worksheet): The worksheet object representing the Google Sheet.
-            meal_name (str): The name of the recipe.
-            ingredients (str): A string listing the ingredients for the recipe.
-            category (str): The category of the meal (e.g., Breakfast, Lunch, Dinner).
-            nutrition (str): The type of diet the recipe supports (e.g., vegan, vegetarian).
-            duration (str): The estimated preparation time for the recipe (e.g., short, medium, long).
+    Params:
+        worksheet (gspread.models.Worksheet): The worksheet object representing the Google Sheet.
+        meal_name (str): The name of the recipe.
+        ingredients (str): A string listing the ingredients for the recipe.
+        category (str): The category of the meal (e.g., Breakfast, Lunch, Dinner).
+        nutrition (str): The type of diet the recipe supports (e.g., vegan, vegetarian).
+        duration (str): The estimated preparation time for the recipe (e.g., short, medium, long).
 
-        Returns:
-            bool: True if the recipe was successfully added, False if an error occurred.
-    '''
+    Returns:
+        bool: True if the recipe was successfully added, False if an error occurred.
+    """
     
     try:
         new_recipe = {
@@ -244,19 +309,16 @@ def add_recipe(worksheet, meal_name, ingredients, category, nutrition, duration)
 
 
 def delete_recipe(worksheet, meal_name):
-    '''
+    """
     Deletes a recipe from the Google Sheet based on the meal name.
 
-    This function searches for the row that contains the specified meal name and deletes it 
-    from the Google Sheet.
+    Params:
+        worksheet (gspread.models.Worksheet): The worksheet object representing the Google Sheet.
+        meal_name (str): The name of the recipe to delete.
 
-        Params:
-            worksheet (gspread.models.Worksheet): The worksheet object representing the Google Sheet.
-            meal_name (str): The name of the recipe to delete.
-
-        Returns:
-            bool: True if the recipe was successfully deleted, False if the recipe was not found or an error occurred.
-    '''
+    Returns:
+        bool: True if the recipe was successfully deleted, False if the recipe was not found or an error occurred.
+    """
     try:
         cell = worksheet.find(meal_name)
         
@@ -280,17 +342,20 @@ def delete_recipe(worksheet, meal_name):
     
 
 def main():
-    '''
-     Main function that loads the Google Sheet data, displays a preview, and provides search and filter functionality.
+    """
+    Main function that loads the Google Sheet data, displays a preview, and provides search and filter functionality.
 
-        This function:
-        - Loads data from a Google Sheet into a Pandas DataFrame.
-        - Displays the first few rows of the DataFrame.
-        - Provides a text input for searching recipes based on various parameters.
-        - Displays the filtered recipes based on the search input.
-        - Allows user to add his own recepis to the sheet(db)
-        - Provides an optional filter to select and display recipes based on a specific column value.
-    '''
+    This function:
+    - Loads data from a Google Sheet into a Pandas DataFrame.
+    - Displays the first few rows of the DataFrame.
+    - Provides a text input for searching recipes based on various parameters.
+    - Displays the filtered recipes based on the search input.
+    - Allows user to add their own recipes to the sheet (db).
+    - Provides an optional filter to select and display recipes based on a specific column value.
+
+    Returns:
+        None
+    """
     SHEET_ID = '150FEJZreTXRc3NrDRhSouMDFdAVfuQFxJ5NnRzPrm98'
     secrets = st.secrets['google']['application_credentials']
     
