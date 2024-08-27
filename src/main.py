@@ -15,107 +15,6 @@ SCOPES = [
 ]
 
 
-# def update_config(config):
-#     st.write('update run', config)
-#     df, worksheet = get_data_from_db()
-#     users = config.get("usernames", {})
-
-#     data_to_update = []
-#     for username, details in users.items():
-#         user_info = {
-#             "username": username,
-#             "email": details.get("email"),
-#             "logged_in": details.get("logged_in"),
-#             "name": details.get("name"),
-#             "password": details.get("password")
-#         }
-#         data_to_update.append(user_info)
-    
-#     new_df = pd.DataFrame(data_to_update)
-
-#     # Vergleich der DataFrames
-#     if df.equals(new_df):
-#         st.write('Keine Änderungen erkannt, kein Update erforderlich')
-#     else:
-#         # Bestehende Daten löschen und neues DataFrame in das Worksheet schreiben
-#         worksheet.clear()  # Löscht den Inhalt des aktuellen Worksheets
-
-#         # Überschrift hinzufügen
-#         worksheet.append_row(list(new_df.columns))
-
-#         # Daten hinzufügen
-#         for row in new_df.values.tolist():
-#             worksheet.append_row(row)
-        
-#         st.write('Sheet wurde aktualisiert')
-
-
-def authenticate_user():
-    SHEET_ID = '1_nJOUU06XiRuq0W-d1kaY7e5oKa1tlXLettEh_T_xh8'
-    secrets = st.secrets['google']['db_credentials']
-
-    df, worksheet = load_sheet_data(SHEET_ID, secrets)
-    st.write(df)
-
-    credentials = {'usernames': {}}
-    for _, row in df.iterrows():
-        username = row['username']
-        credentials['usernames'][username] = {
-            'email': row['email'],
-            'failed_login_attempts': row.get('failed_login_attempts', 0),
-            'logged_in': row['logged_in'],
-            'name': row['name'],
-            'password': row['password']
-        }
-        
-    with open('../config.yaml') as file:
-        config = yaml.load(file, Loader=yaml.SafeLoader)
-    
-    config['credentials'] = credentials
-    st.write(config)  
-    # Pre-hashing all plain text passwords once
-    # Hasher.hash_passwords(config['credentials'])
-
-    authenticator = stauth.Authenticate(
-        config['credentials'],
-        config['cookie']['name'],
-        config['cookie']['key'],
-        config['cookie']['expiry_days'],
-        config['pre-authorized']
-    )
-
-    return authenticator, config
-    
-
-def handle_auth_error(config, status):
-    if status is False:
-        st.error('Username/Passwort ist falsch')
-    elif status is None:
-        st.warning('Bitte gebe deine Anmeldedaten ein')
-    
-    # update_config(config)
-    registrate_new_user(config)
-
-
-def reset_pw(config):
-    try:
-        if authenticator.reset_password(st.session_state['username'], location='sidebar', fields={'Form name':'Passwort zurückseten', 'Current password':'Aktuelles Passwort', 'New password':'Neues Passwort', 'Repeat password': 'Passwort bestätigen', 'Reset':'Zurücksetzen'}):
-            # update_config(config)
-            st.sidebar.success('Passwort wurde erfolgreich geändert')
-    except Exception as e:
-        st.sidebar.error(e)
-
-
-def registrate_new_user(config):
-    try:
-        email_of_registered_user, username_of_registered_user, name_of_registered_user = authenticator.register_user(pre_authorization=False, location='sidebar', fields= {'Form name':'Registrierung', 'Email':'Email', 'Username':'Benutzername', 'Password':'Passwort', 'Repeat password':'Passwort bestätigen', 'Register':'Registrieren'}, captcha=False)
-        if email_of_registered_user:
-            st.sidebar.success('Registrierung erfolgreich! Sie können sich jetzt anmelden')
-            # update_config(config) 
-    except Exception as e:
-        st.sidebar.error(e)
-
-
 def load_credentials(secrets):
     creds_json = secrets
     creds_dict = json.loads(creds_json)
@@ -143,6 +42,110 @@ def load_sheet_data(sheet_id, secrets):
     else:
         df = pd.DataFrame(columns=worksheet.row_values(1))
     return df, worksheet
+
+
+def authenticate_user():
+    SHEET_ID = '1_nJOUU06XiRuq0W-d1kaY7e5oKa1tlXLettEh_T_xh8'
+    secrets = st.secrets['google']['db_credentials']
+
+    df, worksheet = load_sheet_data(SHEET_ID, secrets)
+    st.write(df)
+
+    credentials = {'usernames': {}}
+    for _, row in df.iterrows():
+        username = row['username']
+        credentials['usernames'][username] = {
+            'email': row['email'],
+            'name': row['name'],
+            'password': row['password']
+        }
+        
+    with open('../config.yaml') as file:
+        config = yaml.load(file, Loader=yaml.SafeLoader)
+    
+    config['credentials'] = credentials
+    st.write(config)  
+    # Pre-hashing all plain text passwords once
+    # Hasher.hash_passwords(config['credentials'])
+
+    authenticator = stauth.Authenticate(
+        config['credentials'],
+        config['cookie']['name'],
+        config['cookie']['key'],
+        config['cookie']['expiry_days'],
+        config['pre-authorized']
+    )
+
+    return authenticator, config, worksheet
+
+
+def registrate_new_user(config):
+    try:
+        email_of_registered_user, username_of_registered_user, name_of_registered_user = authenticator.register_user(pre_authorization=False, location='sidebar', fields= {'Form name':'Registrierung', 'Email':'Email', 'Username':'Benutzername', 'Password':'Passwort', 'Repeat password':'Passwort bestätigen', 'Register':'Registrieren'}, captcha=False)
+        if email_of_registered_user:
+            st.sidebar.success('Registrierung erfolgreich! Sie können sich jetzt anmelden')
+            # update_config(config) 
+    except Exception as e:
+        st.sidebar.error(e)
+
+
+def update_config(config, search, worksheet):
+    users = config['credentials']['usernames']
+    
+    data_to_update = []
+    for username, details in users.items():
+        st.write(username, details)
+        user_info = {
+            "username": username,
+            "email": details.get("email"),
+            "name": details.get("name"),
+            "password": details.get("password")
+        }
+        data_to_update.append(user_info)
+        
+    
+    df = pd.DataFrame(data_to_update)
+    
+    filtered_df = df[df['username'] == search]
+    st.write(filtered_df)
+    
+    if not filtered_df.empty:
+        data = worksheet.get_all_records()
+        for i, row in enumerate(data):
+            if row['username'] == search:
+                row_index = i + 2
+                worksheet.delete_row(row_index)
+                new_data = [
+                    search,
+                    filtered_df.iloc[0]['email'],  
+                    filtered_df.iloc[0]['name'], 
+                    filtered_df.iloc[0]['password']  
+                ]
+                
+                worksheet.insert_row(new_data, row_index)
+                print(f"Replaced row for user {search} at index {row_index}")
+                return
+    else:
+        return None
+  
+
+def handle_auth_error(config, status):
+    if status is False:
+        st.error('Username/Passwort ist falsch')
+    elif status is None:
+        st.warning('Bitte gebe deine Anmeldedaten ein')
+    
+    # update_config(config)
+    registrate_new_user(config)
+
+
+def reset_pw(config):
+    try:
+        if authenticator.reset_password(st.session_state['username'], location='sidebar', fields={'Form name':'Passwort zurückseten', 'Current password':'Aktuelles Passwort', 'New password':'Neues Passwort', 'Repeat password': 'Passwort bestätigen', 'Reset':'Zurücksetzen'}):
+            # update_config(config)
+            st.sidebar.success('Passwort wurde erfolgreich geändert')
+    except Exception as e:
+        st.sidebar.error(e)
 
 
 def search_recipes(df, search_params):
@@ -328,17 +331,19 @@ if __name__ == '__main__':
         st.session_state['uuid_key'] = str(uuid4())
     uuid_key = st.session_state['uuid_key']
     
-    authenticator, config = authenticate_user()
-    authenticator.login(location='main', fields={'Form name':'Anmeldung', 'Username':'Nutzername', 'Password':'Passwort', 'Login':'Anmelden'}, key=uuid_key)
-    st.write(st.session_state['username'])
-    
+    authenticator, config, worksheet = authenticate_user()
+    authenticator.login(
+        location='main', 
+        fields={'Form name':'Anmeldung', 'Username':'Nutzername', 'Password':'Passwort', 'Login':'Anmelden'}, 
+        key=uuid_key)
+    st.write(st.session_state['username'])    
     
     if st.session_state['authentication_status']:
         st.sidebar.write(f'Wilkommen {st.session_state["name"]}')
         authenticator.logout(button_name='Abmelden', location='sidebar', key=uuid_key)
         # reset_pw(config)
-        # update_config(config)
+        update_config(config, st.session_state['username'], worksheet)  
         # main()
         st.title('Wilkommen')
     else:
-        handle_auth_error(config, st.session_state['authentication_status'])
+        handle_auth_error(config, st.session_state['authentication_status']) 
