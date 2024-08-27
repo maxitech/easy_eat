@@ -9,7 +9,6 @@ import json
 from uuid import uuid4
 import yaml
 
-import os
 
 SCOPES = [
     'https://www.googleapis.com/auth/spreadsheets'
@@ -83,9 +82,8 @@ def authenticate_user():
             'name': row['name'],
             'password': row['password']
         }
-    cwd = os.getcwd()
-    print(cwd)
-    with open('easy_eat\config.yaml') as file:
+        
+    with open('config.yaml') as file:
         config = yaml.load(file, Loader=yaml.SafeLoader)
     
     config['credentials'] = credentials
