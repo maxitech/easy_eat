@@ -64,7 +64,6 @@ def authenticate_user():
         config = yaml.load(file, Loader=yaml.SafeLoader)
     
     config['credentials'] = credentials
-    st.write(config)  
     # Pre-hashing all plain text passwords once
     # Hasher.hash_passwords(config['credentials'])
 
@@ -79,12 +78,42 @@ def authenticate_user():
     return authenticator, config, worksheet
 
 
-def registrate_new_user(config):
+def registrate_new_user(config, worksheet):
     try:
-        email_of_registered_user, username_of_registered_user, name_of_registered_user = authenticator.register_user(pre_authorization=False, location='sidebar', fields= {'Form name':'Registrierung', 'Email':'Email', 'Username':'Benutzername', 'Password':'Passwort', 'Repeat password':'Passwort bestätigen', 'Register':'Registrieren'}, captcha=False)
+        email_of_registered_user, username_of_registered_user, name_of_registered_user = authenticator.register_user(
+            pre_authorization=False, 
+            location='sidebar', 
+            fields={
+                'Form name': 'Registrierung', 
+                'Email': 'Email', 
+                'Username': 'Benutzername', 
+                'Password': 'Passwort', 
+                'Repeat password': 'Passwort bestätigen', 
+                'Register': 'Registrieren'
+            }, 
+            captcha=False
+        )
+
         if email_of_registered_user:
             st.sidebar.success('Registrierung erfolgreich! Sie können sich jetzt anmelden')
-            # update_config(config) 
+
+            password = config['credentials']['usernames'].get(username_of_registered_user, {}).get('password')
+
+            config['credentials']['usernames'][username_of_registered_user] = {
+                'email': email_of_registered_user,
+                'name': name_of_registered_user,
+                'password': password,
+            }
+
+            new_data = [
+                username_of_registered_user,
+                email_of_registered_user,
+                name_of_registered_user,
+                password,
+            ]
+            worksheet.append_row(new_data)
+            st.write(f"Added new row for user {username_of_registered_user}")
+
     except Exception as e:
         st.sidebar.error(e)
 
@@ -94,7 +123,6 @@ def update_config(config, search, worksheet):
     
     data_to_update = []
     for username, details in users.items():
-        st.write(username, details)
         user_info = {
             "username": username,
             "email": details.get("email"),
@@ -107,7 +135,6 @@ def update_config(config, search, worksheet):
     df = pd.DataFrame(data_to_update)
     
     filtered_df = df[df['username'] == search]
-    st.write(filtered_df)
     
     if not filtered_df.empty:
         data = worksheet.get_all_records()
@@ -129,14 +156,13 @@ def update_config(config, search, worksheet):
         return None
   
 
-def handle_auth_error(config, status):
+def handle_auth_error(config, status, worksheet):
     if status is False:
         st.error('Username/Passwort ist falsch')
     elif status is None:
         st.warning('Bitte gebe deine Anmeldedaten ein')
     
-    # update_config(config)
-    registrate_new_user(config)
+    registrate_new_user(config, worksheet)
 
 
 def reset_pw(config):
@@ -336,14 +362,12 @@ if __name__ == '__main__':
         location='main', 
         fields={'Form name':'Anmeldung', 'Username':'Nutzername', 'Password':'Passwort', 'Login':'Anmelden'}, 
         key=uuid_key)
-    st.write(st.session_state['username'])    
     
     if st.session_state['authentication_status']:
         st.sidebar.write(f'Wilkommen {st.session_state["name"]}')
         authenticator.logout(button_name='Abmelden', location='sidebar', key=uuid_key)
         # reset_pw(config)
         update_config(config, st.session_state['username'], worksheet)  
-        # main()
-        st.title('Wilkommen')
+        main()
     else:
-        handle_auth_error(config, st.session_state['authentication_status']) 
+        handle_auth_error(config, st.session_state['authentication_status'], worksheet) 
