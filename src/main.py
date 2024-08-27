@@ -141,7 +141,7 @@ def update_config(config, search, worksheet):
         for i, row in enumerate(data):
             if row['username'] == search:
                 row_index = i + 2
-                worksheet.delete_row(row_index)
+                worksheet.delete_rows(row_index)
                 new_data = [
                     search,
                     filtered_df.iloc[0]['email'],  
@@ -150,7 +150,6 @@ def update_config(config, search, worksheet):
                 ]
                 
                 worksheet.insert_row(new_data, row_index)
-                print(f"Replaced row for user {search} at index {row_index}")
                 return
     else:
         return None
@@ -165,10 +164,15 @@ def handle_auth_error(config, status, worksheet):
     registrate_new_user(config, worksheet)
 
 
-def reset_pw(config):
+def reset_pw(config, search, worksheet):
     try:
-        if authenticator.reset_password(st.session_state['username'], location='sidebar', fields={'Form name':'Passwort zurückseten', 'Current password':'Aktuelles Passwort', 'New password':'Neues Passwort', 'Repeat password': 'Passwort bestätigen', 'Reset':'Zurücksetzen'}):
-            # update_config(config)
+        if authenticator.reset_password(
+            st.session_state['username'], 
+            location='sidebar', 
+            fields={'Form name':'Passwort zurückseten', 
+                    'Current password':'Aktuelles Passwort',
+                    'New password':'Neues Passwort',                                            'Repeat password':'Passwort bestätigen', 'Reset':'Zurücksetzen'}):
+            update_config(config, search, worksheet)
             st.sidebar.success('Passwort wurde erfolgreich geändert')
     except Exception as e:
         st.sidebar.error(e)
@@ -366,7 +370,7 @@ if __name__ == '__main__':
     if st.session_state['authentication_status']:
         st.sidebar.write(f'Wilkommen {st.session_state["name"]}')
         authenticator.logout(button_name='Abmelden', location='sidebar', key=uuid_key)
-        # reset_pw(config)
+        reset_pw(config, st.session_state['username'], worksheet)
         update_config(config, st.session_state['username'], worksheet)  
         main()
     else:
