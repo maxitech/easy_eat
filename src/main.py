@@ -141,7 +141,6 @@ def update_config(config, search, worksheet):
         for i, row in enumerate(data):
             if row['username'] == search:
                 row_index = i + 2
-                worksheet.delete_rows(row_index)
                 new_data = [
                     search,
                     filtered_df.iloc[0]['email'],  
@@ -149,7 +148,10 @@ def update_config(config, search, worksheet):
                     filtered_df.iloc[0]['password']  
                 ]
                 
-                worksheet.insert_row(new_data, row_index)
+                worksheet.update(
+                    range_name=f"A{row_index}:D{row_index}", 
+                    values=[new_data]
+                )
                 return
     else:
         return None
