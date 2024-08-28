@@ -83,7 +83,7 @@ def authenticate_user():
             'password': row['password']
         }
         
-    with open('config.yaml') as file:
+    with open('../config.yaml') as file:
         config = yaml.load(file, Loader=yaml.SafeLoader)
     
     config['credentials'] = credentials
