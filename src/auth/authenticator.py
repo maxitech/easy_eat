@@ -1,9 +1,8 @@
 import streamlit as st
 import streamlit_authenticator as stauth
 
-import yaml
-
 from database import load_sheet_data
+from utils import load_yaml_config
 
 
 def authenticate_user():
@@ -28,10 +27,8 @@ def authenticate_user():
             'name': row['name'],
             'password': row['password']
         }
-        
-    with open('../config.yaml') as file:
-        config = yaml.load(file, Loader=yaml.SafeLoader)
-    
+
+    config = load_yaml_config()   
     config['credentials'] = credentials
     # Pre-hashing all plain text passwords once
     # Hasher.hash_passwords(config['credentials'])
