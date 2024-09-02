@@ -1,9 +1,7 @@
 import streamlit as st
 
-from uuid import uuid4
-
 from database import load_sheet_data
-from auth import authenticate_user, handle_auth_error,registrate_new_user, reset_pw, update_config
+from auth import handle_authentication
 from recipes import search_recipes, add_recipe, delete_recipe
 
 
@@ -93,22 +91,6 @@ def main():
 
 if __name__ == '__main__':  
     # ---------- AUTHENTICATION ----------
-    if 'uuid_key' not in st.session_state:
-        st.session_state['uuid_key'] = str(uuid4())
-    uuid_key = st.session_state['uuid_key']
-    
-    authenticator, config, worksheet = authenticate_user()
-    authenticator.login(
-        location='main', 
-        fields={'Form name':'Anmeldung', 'Username':'Nutzername', 'Password':'Passwort', 'Login':'Anmelden'}, 
-        key=uuid_key)
-    
-    if st.session_state['authentication_status']:
-        st.sidebar.write(f'Wilkommen {st.session_state["name"]}')
-        authenticator.logout(button_name='Abmelden', location='sidebar', key=uuid_key)
-        reset_pw(authenticator, config, st.session_state['username'], worksheet)
-        update_config(config, st.session_state['username'], worksheet)  
+    auth_successful = handle_authentication()
+    if auth_successful:
         main()
-    else:
-        if handle_auth_error(st.session_state['authentication_status']):
-            registrate_new_user(authenticator, config, worksheet)
