@@ -1,6 +1,27 @@
 import gspread
 import streamlit as st
 
+from database import load_sheet_data
+
+
+def load_recipe():
+    """
+    Loads the recipe data from a Google Sheet.
+
+    This function connects to a Google Sheet using the provided Sheet ID and credentials,
+    loads the data into a Pandas DataFrame, and returns both the DataFrame and the worksheet object.
+
+    Returns:
+        tuple: A tuple containing:
+            - df (pandas.DataFrame): The DataFrame containing the loaded recipe data.
+            - worksheet (gspread.models.Worksheet): The worksheet object representing the Google Sheet.
+    """
+    SHEET_ID = '150FEJZreTXRc3NrDRhSouMDFdAVfuQFxJ5NnRzPrm98'
+    secrets = st.secrets['google']['application_credentials']
+    
+    df, worksheet = load_sheet_data(SHEET_ID, secrets)
+    return df, worksheet
+
 
 def add_recipe(worksheet, meal_name, ingredients, category, nutrition, duration):
     """
