@@ -10,12 +10,12 @@ def main():
         title='Home', 
         default=True
     )
-
+    
     add_recipe = st.Page(
         page='views/add_recipe.py',
         title='Rezept hinzufügen',
     )
-    
+  
     del_recipe = st.Page(
         page='views/delete_recipe.py',
         title='Rezept löschen'
