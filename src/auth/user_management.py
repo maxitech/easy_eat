@@ -16,7 +16,6 @@ def registrate_new_user(authenticator, config, worksheet):
     try:
         email_of_registered_user, username_of_registered_user, name_of_registered_user = authenticator.register_user(
             pre_authorization=False, 
-            location='sidebar', 
             fields={
                 'Form name': 'Registrierung', 
                 'Email': 'Email', 
@@ -67,7 +66,7 @@ def reset_pw(authenticator, config, curr_user, worksheet):
         if authenticator.reset_password(
             st.session_state['username'], 
             location='sidebar', 
-            fields={'Form name':'Passwort zurückseten', 
+            fields={'Form name':'Passwort zurücksetzen', 
                     'Current password':'Aktuelles Passwort',
                     'New password':'Neues Passwort',                                            'Repeat password':'Passwort bestätigen', 'Reset':'Zurücksetzen'}):
             update_config(config, curr_user, worksheet)

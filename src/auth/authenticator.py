@@ -60,7 +60,7 @@ def handle_auth_error(status):
         st.error('Username/Passwort ist falsch')
         return True
     elif status is None:
-        st.warning('Bitte gebe deine Anmeldedaten ein')
+        st.warning('Bitte geben Sie Ihre Anmeldedaten ein')
         return True
     
     return False
