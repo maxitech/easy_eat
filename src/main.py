@@ -24,7 +24,7 @@ def main():
     # --- NAVIGATION SETUP ---
     pg = st.navigation(
         {
-            'App':[home_page, add_recipe, del_recip],
+            'App':[home_page, add_recipe, del_recipe],
         }
     )   
     pg.run()
