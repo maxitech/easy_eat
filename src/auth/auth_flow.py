@@ -23,12 +23,25 @@ def handle_authentication():
     if st.session_state['authentication_status']:
         st.sidebar.write(f'Wilkommen {st.session_state["name"]}')
         authenticator.logout(button_name='Abmelden', location='sidebar', key=uuid_key)
+        
+        if 'show_pw_reset' not in st.session_state:
+            st.session_state['show_pw_reset'] = False
+    
         if st.sidebar.button('Passwort ändern'):
+            st.session_state['show_pw_reset'] = not st.session_state['show_pw_reset']  
+         
+        if st.session_state['show_pw_reset']:
             reset_pw(authenticator, config, st.session_state['username'], worksheet)
         update_config(config, st.session_state['username'], worksheet)  
         return True
     else:
         if handle_auth_error(st.session_state['authentication_status']):
+            if 'show_reg_new_user' not in st.session_state:
+                st.session_state['show_reg_new_user'] = False
+                
             if st.button('Erstellen Sie einen Account'):
+                st.session_state['show_reg_new_user'] = not st.session_state['show_reg_new_user']
+                 
+            if st.session_state['show_reg_new_user']:
                 registrate_new_user(authenticator, config, worksheet)
         return False

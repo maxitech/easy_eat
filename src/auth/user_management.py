@@ -28,7 +28,7 @@ def registrate_new_user(authenticator, config, worksheet):
         )
 
         if email_of_registered_user:
-            st.sidebar.success('Registrierung erfolgreich! Sie können sich jetzt anmelden')
+            st.success('Registrierung erfolgreich! Sie können sich jetzt anmelden')
 
             password = config['credentials']['usernames'].get(username_of_registered_user, {}).get('password')
 
@@ -47,7 +47,7 @@ def registrate_new_user(authenticator, config, worksheet):
             worksheet.append_row(new_data)
 
     except Exception as e:
-        st.sidebar.error(e)
+        st.error(e)
         
 
 def reset_pw(authenticator, config, curr_user, worksheet):

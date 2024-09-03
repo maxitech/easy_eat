@@ -29,7 +29,7 @@ def main():
     )   
     pg.run()
 
-if __name__ == '__main__':  
+if __name__ == '__main__':
     # --- AUTHENTICATION ---
     auth_successful = handle_authentication()
     if auth_successful:
