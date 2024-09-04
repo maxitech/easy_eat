@@ -1,5 +1,7 @@
 import streamlit as st
 
+from utils import init_btn_session_state, toggle_btn_session_state
+
 from .search import search_recipes
 from .recipe_management import add_recipe, delete_recipe
 
@@ -43,13 +45,12 @@ def handle_optional_search(df):
 
     Returns:
         None
-    """ 
-    if 'show_optional_filter' not in st.session_state:
-        st.session_state['show_optional_filter'] = False
+    """
+    init_btn_session_state('show_optional_filter')
     
     if st.button('Optionaler Filter'):
-        st.session_state['show_optional_filter'] = not st.session_state['show_optional_filter']   
-
+        toggle_btn_session_state('show_optional_filter')
+    
     if st.session_state['show_optional_filter']:
         columns = df.columns.tolist()
         selected_column = st.selectbox('Wähle eine Spalte nach der gefiltert werden soll:', columns, index=None, placeholder='Wähle eine Option')

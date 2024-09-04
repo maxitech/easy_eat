@@ -1,6 +1,8 @@
 import streamlit as st
 from uuid import uuid4
+
 from auth import authenticate_user, handle_auth_error, update_config, registrate_new_user, reset_pw
+from utils import init_btn_session_state, toggle_btn_session_state
 
 
 def handle_authentication():
@@ -23,24 +25,21 @@ def handle_authentication():
     if st.session_state['authentication_status']:
         st.sidebar.write(f'Wilkommen {st.session_state["name"]}')
         authenticator.logout(button_name='Abmelden', location='sidebar', key=uuid_key)
-        
-        if 'show_pw_reset' not in st.session_state:
-            st.session_state['show_pw_reset'] = False
-    
-        if st.sidebar.button('Passwort ändern'):
-            st.session_state['show_pw_reset'] = not st.session_state['show_pw_reset']  
          
+        init_btn_session_state('show_pw_reset')
+        if st.sidebar.button('Passwort ändern'):
+            toggle_btn_session_state('show_pw_reset')
+            
         if st.session_state['show_pw_reset']:
             reset_pw(authenticator, config, st.session_state['username'], worksheet)
+            
         update_config(config, st.session_state['username'], worksheet)  
         return True
     else:
         if handle_auth_error(st.session_state['authentication_status']):
-            if 'show_reg_new_user' not in st.session_state:
-                st.session_state['show_reg_new_user'] = False
-                
+            init_btn_session_state('show_reg_new_user')
             if st.button('Erstellen Sie einen Account'):
-                st.session_state['show_reg_new_user'] = not st.session_state['show_reg_new_user']
+                toggle_btn_session_state('show_reg_new_user')
                  
             if st.session_state['show_reg_new_user']:
                 registrate_new_user(authenticator, config, worksheet)
