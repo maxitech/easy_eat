@@ -24,7 +24,23 @@ def registrate_new_user(authenticator, config, worksheet):
                 'Repeat password': 'Passwort bestätigen', 
                 'Register': 'Registrieren'
             }, 
-            captcha=False
+            captcha=False, 
+            domains=[
+            "gmail.com",
+            "yahoo.com",
+            "outlook.com",
+            "hotmail.com",
+            "icloud.com",
+            "aol.com",
+            "msn.com",
+            "live.com",
+            "comcast.net",
+            "me.com",
+            "protonmail.com",
+            "ymail.com",
+            "mail.com",
+            "gmx.com"
+            ]
         )
 
         if email_of_registered_user:
@@ -49,6 +65,7 @@ def registrate_new_user(authenticator, config, worksheet):
     except Exception as e:
         st.error(e)
         
+    st.text(body='Passwort', help='8-20 Zeichen | min. 1 Großbuchstabe, Kleinbuchstabe, Zahl & Sonderzeichen (@$!%*?&)')  
 
 def reset_pw(authenticator, config, curr_user, worksheet):
     """
@@ -68,12 +85,15 @@ def reset_pw(authenticator, config, curr_user, worksheet):
             location='sidebar', 
             fields={'Form name':'Passwort zurücksetzen', 
                     'Current password':'Aktuelles Passwort',
-                    'New password':'Neues Passwort',                                            'Repeat password':'Passwort bestätigen', 'Reset':'Zurücksetzen'}):
+                    'New password':'Neues Passwort',
+                    'Repeat password':'Passwort bestätigen', 
+                    'Reset':'Zurücksetzen'}):
             update_config(config, curr_user, worksheet)
             st.sidebar.success('Passwort wurde erfolgreich geändert')
     except Exception as e:
         st.sidebar.error(e)
         
+    st.sidebar.text(body='Passwort', help='8-20 Zeichen | min. 1 Großbuchstabe, Kleinbuchstabe, Zahl & Sonderzeichen (@$!%*?&)')
         
 def update_config(config, curr_user, worksheet):
     """
