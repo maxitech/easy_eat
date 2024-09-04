@@ -1,6 +1,19 @@
 # EasyEat
 EasyEat is a user-friendly platform designed to eliminate the daily struggle of deciding what to eat. It features a centralized recipe database where users can search for, add, and manage recipes collaboratively. All users share the same recipe collection, making it a communal space for culinary inspiration. Authentication is required, allowing users to log in, log out, and manage their accounts securely. While all users can currently add and search for recipes, the ability to delete recipes will soon be restricted to admins to ensure the integrity of the shared database. EasyEat is powered by Python, Streamlit and with Google Sheets as lightweight database. The authentication and database management are handled through the Google Cloud Console, and the app is deployed on Streamlit Cloud.
-Click [here](https://memoryproto.netlify.app/) to visit the deployed app!
+Click [here](https://easyeat.streamlit.app/) to visit the deployed app!
+
+## :computer: Try it out!
+Explore the application with a demo account! Use the demo credentials provided below to log in.
+
+Click [here](https://memoryproto.netlify.app/) to access the demo.
+  
+  **Demo Credentials:**
+   ```bash
+   # Username
+   demo
+   # Password
+   P@ssw0rd123
+   ```
 
 ## :vertical_traffic_light: Running the Project
 To run the project in your local environment, follow these steps: 
