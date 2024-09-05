@@ -1,11 +1,11 @@
 # EasyEat
-EasyEat is a user-friendly platform designed to eliminate the daily struggle of deciding what to eat. It features a centralized recipe database where users can search for, add, and manage recipes collaboratively. All users share the same recipe collection, making it a communal space for culinary inspiration. Authentication is required, allowing users to log in, log out, and manage their accounts securely. While all users can currently add and search for recipes, the ability to delete recipes will soon be restricted to admins to ensure the integrity of the shared database. EasyEat is powered by Python, Streamlit and with Google Sheets as lightweight database. The authentication and database management are handled through the Google Cloud Console, and the app is deployed on Streamlit Cloud.
-Click [here](https://easyeat.streamlit.app/) to visit the deployed app!
+EasyEat simplifies meal planning by offering a centralized recipe database where users can add, search and manage recipes collaboratively. With secure user authentication, it allows easy access and management, while future updates will introduce admin-only recipe deletion to maintain database integrity. EasyEat is built with Python, Streamlit, and uses Google Sheets for data storage, with API access managed through Google Cloud Console. The app is deployed on Streamlit Cloud for quick accessibility.
+
 
 ## :computer: Try it out!
 Explore the application with a demo account! Use the demo credentials provided below to log in.
 
-Click [here](https://memoryproto.netlify.app/) to access the demo.
+Click [here](https://easyeat.streamlit.app/) to access the demo.
   
   **Demo Credentials:**
    ```bash
@@ -14,6 +14,36 @@ Click [here](https://memoryproto.netlify.app/) to access the demo.
    # Password
    P@ssw0rd123
    ```
+
+## ⚡️ Technologies Used
+- Python
+- Streamlit
+- Pandas
+- Google Sheets (Database)
+- Google Cloud Console (API Access Management)
+
+## 🛠️ Build Tools
+- [Streamlit Cloud](https://streamlit.io/cloud): For deploying and hosting the application.
+- [Google Cloud Console](https://console.cloud.google.com/): For managing API access to Google Sheets.
+
+## 💡 What I Learned
+- **Python & Streamlit Development:** Gained deeper experience building web applications with Streamlit and integrating third-party libraries.
+- **Google Cloud & Sheets Integration:** Learned how to manage API access via Google Cloud Console and integrate Google Sheets as a lightweight database solution.
+- **Authentication in Streamlit:** Integrated secure user authentication using the Streamlit-Authenticator module, improving my understanding of user management.
+- **Collaborative Platform Development:** Built a system that handles multiple users interacting with the same recipe database, which helped me understand collaborative workflows in web apps.
+
+## 🔮 Future Improvement Ideas
+- **Admin Controls for Deletion:** Restrict recipe deletion to admin users only.
+- **User-specific Recipe Collections:** Allow users to create their own collections or favorite recipes.
+- **Google Sheets API Rate Limits**: The app may experience occasional delays or errors when multiple users interact with the database simultaneously, due to Google Sheets API rate limits. This issue resolves automatically after a short period. An improvement to optimize API usage is planned in a future release.
+
+## 💭 Sources and Inspiration
+My understanding of building web apps with Streamlit and integrating external APIs was greatly improved by various resources:
+  - [Streamlit Documentation](https://docs.streamlit.io/)
+  - [Streamlit-Authenticator](https://github.com/mkhorasani/Streamlit-Authenticator)
+  - [Google Cloud Documentation](https://cloud.google.com/docs?hl=en)
+  - [Pandas Documentation](https://pandas.pydata.org/docs/index.html)
+
 
 ## :vertical_traffic_light: Running the Project
 To run the project in your local environment, follow these steps: 
