@@ -5,6 +5,25 @@ from database import load_sheet_data
 from utils import load_yaml_config
 
 
+def load_users():
+    """
+    Loads the user data from a Google Sheet.
+
+    This function connects to a Google Sheet using the provided Sheet ID and credentials,
+    loads the data into a Pandas DataFrame, and returns both the DataFrame and the worksheet object.
+
+    Returns:
+        tuple: A tuple containing:
+            - df (pandas.DataFrame): The DataFrame containing the loaded recipe data.
+            - worksheet (gspread.models.Worksheet): The worksheet object representing the Google Sheet.
+    """
+    SHEET_ID = '1_nJOUU06XiRuq0W-d1kaY7e5oKa1tlXLettEh_T_xh8'
+    secrets = st.secrets['google']['db_credentials']
+
+    df, worksheet = load_sheet_data(SHEET_ID, secrets)
+    return df, worksheet
+
+
 def authenticate_user():
     """
     Authenticates a user using credentials stored in a Google Sheet.
@@ -14,10 +33,7 @@ def authenticate_user():
         dict: The configuration dictionary used by the authenticator.
         gspread.models.Worksheet: The worksheet object representing the Google Sheet.
     """
-    SHEET_ID = '1_nJOUU06XiRuq0W-d1kaY7e5oKa1tlXLettEh_T_xh8'
-    secrets = st.secrets['google']['db_credentials']
-
-    df, worksheet = load_sheet_data(SHEET_ID, secrets)
+    df, worksheet = load_users()
 
     credentials = {'usernames': {}}
     for _, row in df.iterrows():

@@ -66,36 +66,3 @@ def add_recipe(worksheet, meal_name, ingredients, category, nutrition, duration)
     except Exception as error:
         st.error(f'Ein unerwarteter Fehler ist aufgetreten! {error}')
         return False
-    
-    
-def delete_recipe(worksheet, meal_name):
-    """
-    Deletes a recipe from the Google Sheet based on the meal name.
-
-    Params:
-        worksheet (gspread.models.Worksheet): The worksheet object representing the Google Sheet.
-        meal_name (str): The name of the recipe to delete.
-
-    Returns:
-        bool: True if the recipe was successfully deleted, False if the recipe was not found or an error occurred.
-    """
-    try:
-        cell = worksheet.find(meal_name)
-        
-        if cell: 
-            worksheet.delete_rows(cell.row)
-            st.success('Das Rezept wurde erfolgreich gelöscht!')
-            return True
-        else:
-            st.error('Das Rezept konnte nicht gelöscht werden, überprüfen Sie ihre Eingabe!')  
-            return False
-        
-    except gspread.exceptions.APIError as api_error:
-        st.error(f"API Fehler aufgetreten: {api_error}")
-        return False
-    except gspread.exceptions.RequestError as request_error:
-        st.error(f"Netzwerkfehler aufgetreten: {request_error}")
-        return False
-    except Exception as error:
-        st.error(f'Ein unerwarteter Fehler ist aufgetreten! {error}')
-        return False

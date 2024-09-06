@@ -1,9 +1,8 @@
 import streamlit as st
 
-from utils import init_btn_session_state, toggle_btn_session_state
+from utils import init_btn_session_state, toggle_btn_session_state, search, delete_row
 
-from .search import search_recipes
-from .recipe_management import add_recipe, delete_recipe
+from .recipe_management import add_recipe
 
 
 def handle_search(df):
@@ -23,7 +22,7 @@ def handle_search(df):
     search_input = st.text_input('Suche ein Rezept:', help='Suchparameter: Gericht | Kategorie | Ernährungsweise | Dauer | Zutaten').strip()
 
     if search_input:
-        filtered_df = search_recipes(df, search_input)
+        filtered_df = search(df, search_input)
         
         if not filtered_df.empty:
             st.subheader(f"Rezepte mit '{search_input}':")
@@ -101,10 +100,9 @@ def handle_delete_recipe(df, worksheet):
     """
     Handles the recipe deletion process within the application.
 
-    This function allows the user to select a recipe to delete from the Google Sheet.
-    The user can choose a recipe from a dropdown list, and if the recipe exists,
-    it is displayed and can be deleted. Feedback is provided based on the success or failure
-    of the deletion process.
+    This function allows the user to select a recipe from a dropdown list and delete it from the Google Sheet.
+    If the recipe exists in the DataFrame, it is displayed, and a confirmation button allows for deletion.
+    The function provides feedback on whether the deletion was successful or if an error occurred.
 
     Params:
         df (pandas.DataFrame): The DataFrame containing the recipe data.
@@ -118,10 +116,10 @@ def handle_delete_recipe(df, worksheet):
     if df.empty:
         st.warning('Keine Rezepte zum Löschen, fügen Sie erst welche hinzu.')
     if delete_input:
-        value_to_delete = search_recipes(df, delete_input)
+        value_to_delete = search(df, delete_input)
         if not value_to_delete.empty:
             st.write(value_to_delete)
             if st.button('Löschen'):    
-                delete_recipe(worksheet, delete_input) 
+                delete_row(worksheet, delete_input, entity_type='recipe') 
         else:
             st.write('Kein Rezept gefunden, bitte überprüfe deine Eingabe!')
