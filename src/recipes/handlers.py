@@ -71,7 +71,7 @@ def handle_add_recipe(worksheet):
     Handles the form submission for adding a new recipe to the Google Sheet.
 
     This function displays a form where users can input details for a new recipe,
-    including the meal name, ingredients, category, nutrition type, and duration.
+    including the meal name, ingredients, category, nutrition type, duration and preparation.
     Once the form is submitted, the recipe is added to the Google Sheet.
 
     Params:
@@ -88,13 +88,14 @@ def handle_add_recipe(worksheet):
         category = st.selectbox('Wähle eine Kategorie', ['Frühstück', 'Mittagessen', 'Abendessen'], index=None, placeholder='Welche Mahlzeit passt zu deinem Rezept?')
         nutrition = st.selectbox('Wähle eine Ernährungsweise:', ['vegan', 'vegetarisch', 'andere'], index=None, placeholder='Was ist die passende Ernährungsweise zu deinem Rezept?')
         duration = st.selectbox('Wähle eine Option:', ['kurz', 'mittel', 'lang'], index=None, placeholder='Wie lange dauert dein Gericht?')
+        preparation = st.text_input('Wie wird das Gericht zubereitet?').strip().title()
         
         submitted = st.form_submit_button('Hinzufügen')
         if submitted:
-            if not (meal_name and ingredients and category and nutrition and duration):
+            if not (meal_name and ingredients and category and nutrition and duration and preparation):
                 st.error('Bitte füllen Sie die Felder aus!')
             else:
-                add_recipe(worksheet, meal_name, ingredients, category, nutrition, duration)
+                add_recipe(worksheet, meal_name, ingredients, category, nutrition, duration, preparation)
 
 
 def handle_delete_recipe(df, worksheet):
