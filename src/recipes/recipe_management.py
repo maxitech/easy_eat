@@ -23,7 +23,7 @@ def load_recipe():
     return df, worksheet
 
 
-def add_recipe(worksheet, meal_name, ingredients, category, nutrition, duration):
+def add_recipe(worksheet, meal_name, ingredients, category, nutrition, duration, preparation):
     """
     Adds a new recipe to the Google Sheet and handles potential errors.
 
@@ -39,6 +39,7 @@ def add_recipe(worksheet, meal_name, ingredients, category, nutrition, duration)
         category (str): The category of the meal (e.g., Breakfast, Lunch, Dinner).
         nutrition (str): The type of diet the recipe supports (e.g., vegan, vegetarian).
         duration (str): The estimated preparation time for the recipe (e.g., short, medium, long).
+        preparation (str): The preparation steps for the meal.
 
     Returns:
         bool: True if the recipe was successfully added, False if an error occurred.
@@ -50,7 +51,8 @@ def add_recipe(worksheet, meal_name, ingredients, category, nutrition, duration)
                     'Kategorie': category, 
                     'Ernährungsweise': nutrition, 
                     'Dauer': duration, 
-                    'Zutaten': ingredients
+                    'Zutaten': ingredients,
+                    'Zubereitung': preparation
                 }
         
         worksheet.append_row(list(new_recipe.values()))
