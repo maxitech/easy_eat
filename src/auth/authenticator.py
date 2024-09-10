@@ -41,7 +41,8 @@ def authenticate_user():
         credentials['usernames'][username] = {
             'email': row['email'],
             'name': row['name'],
-            'password': row['password']
+            'password': row['password'],
+            'role': row['role']
         }
 
     config = load_yaml_config()   

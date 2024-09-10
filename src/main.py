@@ -3,7 +3,8 @@ import streamlit as st
 from auth import handle_authentication
 
 
-def main():    
+def main():
+       
     # --- PAGE SETUP ---    
     home_page = st.Page(
         page='views/home_route.py', 
@@ -23,7 +24,7 @@ def main():
     
     
     # --- CHECK USER ROLE ---
-    if st.session_state['username'] == 'admin':    
+    if st.session_state['user_role'] == 'admin':    
         pages = {
             'App':[home_page, add_recipe, admin_panel]
         }
@@ -45,4 +46,3 @@ if __name__ == '__main__':
     auth_successful = handle_authentication()
     if auth_successful:
         main()
-# ! config path check

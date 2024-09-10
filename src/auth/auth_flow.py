@@ -17,12 +17,24 @@ def handle_authentication():
     uuid_key = st.session_state['uuid_key']
     
     authenticator, config, worksheet = authenticate_user()
+
+    if 'config' not in st.session_state or st.session_state['config'] != config:
+        st.session_state['config'] = config
+
+    if 'worksheet' not in st.session_state or st.session_state['worksheet'] != worksheet:
+        st.session_state['worksheet'] = worksheet
+    
     authenticator.login(
         location='main', 
         fields={'Form name':'Anmeldung', 'Username':'Nutzername', 'Password':'Passwort', 'Login':'Anmelden'}, 
         key=uuid_key)
     
     if st.session_state['authentication_status']:
+        user_role = config['credentials']['usernames'][st.session_state['username']]['role']
+        
+        if 'user_role' not in st.session_state or st.session_state['user_role'] != user_role:
+            st.session_state['user_role'] = config['credentials']['usernames'][st.session_state['username']]['role']
+            
         st.sidebar.write(f'Wilkommen {st.session_state["name"]}')
         authenticator.logout(button_name='Abmelden', location='sidebar', key=uuid_key)
          

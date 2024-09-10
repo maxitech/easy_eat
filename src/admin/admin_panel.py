@@ -3,7 +3,9 @@ import streamlit as st
 from auth import load_users
 from recipes import load_recipe, handle_delete_recipe
 
+from .change_role import change_role
 from .delete_user import handle_delete_user
+
 
 
 def show_admin_panel():
@@ -15,5 +17,9 @@ def show_admin_panel():
     
     # --- DELETE USER ---
     df, worksheet = load_users()
+
     handle_delete_user(df, worksheet)
     st.write(df)
+    
+    # --- CHANGE USER ROLE ---
+    change_role()

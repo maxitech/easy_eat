@@ -52,6 +52,7 @@ def registrate_new_user(authenticator, config, worksheet):
                 'email': email_of_registered_user,
                 'name': name_of_registered_user,
                 'password': password,
+                'role': 'user'
             }
 
             new_data = [
@@ -59,6 +60,7 @@ def registrate_new_user(authenticator, config, worksheet):
                 email_of_registered_user,
                 name_of_registered_user,
                 password,
+                'user'
             ]
             worksheet.append_row(new_data)
 
@@ -95,14 +97,15 @@ def reset_pw(authenticator, config, curr_user, worksheet):
         
     st.sidebar.text(body='Passwort', help='8-20 Zeichen | min. 1 Großbuchstabe, Kleinbuchstabe, Zahl & Sonderzeichen (@$!%*?&)')
         
-def update_config(config, curr_user, worksheet):
+def update_config(config, user, worksheet, new_role=None):
     """
     Updates the configuration and Google Sheet with new user data.
 
     Params:
         config (dict): The configuration dictionary containing user credentials.
-        search (str): The username of the user whose data is to be updated.
-        worksheet (gspread.models.Worksheet): The worksheet object representing the Google Sheet.
+        user (str): The username of the user whose data is to be updated.
+        worksheet (gspread.models.Worksheet):
+        new_role (str): New role of the user | None 
 
     Returns:
         None
@@ -115,31 +118,44 @@ def update_config(config, curr_user, worksheet):
             "username": username,
             "email": details.get("email"),
             "name": details.get("name"),
-            "password": details.get("password")
+            "password": details.get("password"),
+            "role": details.get("role")
         }
         data_to_update.append(user_info)
         
     
     df = pd.DataFrame(data_to_update)
     
-    filtered_df = df[df['username'] == curr_user]
+    filtered_df = df[df['username'] == user]
     
     if not filtered_df.empty:
         data = worksheet.get_all_records()
         for i, row in enumerate(data):
-            if row['username'] == curr_user:
+            if row['username'] == user:
                 row_index = i + 2
+
+                role = new_role if new_role else row['role']
+                
                 new_data = [
-                    curr_user,
+                    user,
                     filtered_df.iloc[0]['email'],  
                     filtered_df.iloc[0]['name'], 
-                    filtered_df.iloc[0]['password']  
+                    filtered_df.iloc[0]['password'],
+                    role
+                      
                 ]
                 
                 worksheet.update(
-                    range_name=f"A{row_index}:D{row_index}", 
+                    range_name=f"A{row_index}:E{row_index}", 
                     values=[new_data]
                 )
+                
+                config['credentials']['usernames'][user] = {
+                'email': filtered_df.iloc[0]['email'],  
+                'name': filtered_df.iloc[0]['name'], 
+                'password': filtered_df.iloc[0]['password'], 
+                'role': role
+                }
                 return
     else:
         return None
