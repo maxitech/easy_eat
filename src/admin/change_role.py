@@ -50,6 +50,4 @@ def change_role():
                 
                 st.session_state['config'] = config
                 
-                st.success(f"Die Rolle wurde auf `{new_role}` geändert.")
-            else:
-                st.info("Der Benutzer hat die Rolle bereits")
+                st.success(f"Die Rolle wurde auf **{new_role.title()}** geändert.")

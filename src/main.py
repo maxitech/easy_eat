@@ -26,7 +26,8 @@ def main():
     # --- CHECK USER ROLE ---
     if st.session_state['user_role'] == 'admin':    
         pages = {
-            'App':[home_page, add_recipe, admin_panel]
+            'App':[home_page, add_recipe],
+            'Administration': [admin_panel]
         }
         st.sidebar.markdown("**Hinweis:** Sie haben die Rolle `Admin`.")
     else:
