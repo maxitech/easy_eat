@@ -3,6 +3,7 @@ import streamlit as st
 from utils import init_btn_session_state, toggle_btn_session_state, search, delete_row
 
 from .recipe_management import add_recipe
+from .display_recipe import display_recipe
 
 
 def handle_search(df):
@@ -25,8 +26,8 @@ def handle_search(df):
         filtered_df = search(df, search_input)
         
         if not filtered_df.empty:
-            st.subheader(f"Rezepte mit '{search_input}':")
-            st.write(filtered_df)
+            st.write(f"Rezepte mit '{search_input}':")
+            display_recipe(filtered_df)
         else:
             st.write(f"Keine Rezepte gefunden mit '{search_input}'.")
 
@@ -60,7 +61,7 @@ def handle_optional_search(df):
 
             if selected_value:
                 filtered_df = df[df[selected_column] == selected_value]
-                st.write(filtered_df)
+                display_recipe(filtered_df)
             else:
                 st.warning('Bitte wähle einen zweiten Filter!')
 
