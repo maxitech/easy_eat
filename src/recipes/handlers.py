@@ -82,17 +82,21 @@ def handle_add_recipe(worksheet):
     """
     with st.form('recipe_form'):
         st.subheader('Füge ein Rezept hinzu') 
-        meal_name = st.text_input('Name des Gerichts').strip().title() 
-        ingredients = st.text_input('Zutaten').strip().title() 
+        meal_name = st.text_input(label='Name des Gerichts', placeholder='Thunfisch Wraps').strip().title() 
+        ingredients = st.text_area(label='Zutaten', placeholder='100g Thunfisch, 2 Blätter Salat, 1/4 Gurke...').strip() 
         
-        category = st.selectbox('Wähle eine Kategorie', ['Frühstück', 'Mittagessen', 'Abendessen'], index=None, placeholder='Welche Mahlzeit passt zu deinem Rezept?')
+        category = st.selectbox('Wähle eine Kategorie', ['Frühstück', 'Mittagessen', 'Abendessen', 'Beliebige Mahlzeit'], index=None, placeholder='Welche Mahlzeit passt zu deinem Rezept?')
         nutrition = st.selectbox('Wähle eine Ernährungsweise:', ['vegan', 'vegetarisch', 'andere'], index=None, placeholder='Was ist die passende Ernährungsweise zu deinem Rezept?')
         duration = st.selectbox('Wähle eine Option:', ['kurz', 'mittel', 'lang'], index=None, placeholder='Wie lange dauert dein Gericht?')
-        preparation = st.text_input('Wie wird das Gericht zubereitet?').strip().title()
+        preparation = st.text_area(label='Wie wird das Gericht zubereitet?', placeholder='Beschreibe die Zubereitung')
         
+        confirm_submit = st.checkbox("Ja, ich habe alles überprüft und möchte das Rezept abschicken.")
         submitted = st.form_submit_button('Hinzufügen')
+        
         if submitted:
-            if not (meal_name and ingredients and category and nutrition and duration and preparation):
+            if not confirm_submit:
+                st.error('Bitte bestätigen Sie, dass Sie alles überprüft haben.')
+            elif not (meal_name and ingredients and category and nutrition and duration and preparation):
                 st.error('Bitte füllen Sie die Felder aus!')
             else:
                 add_recipe(worksheet, meal_name, ingredients, category, nutrition, duration, preparation)
