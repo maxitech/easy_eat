@@ -1,6 +1,7 @@
 import gspread
 from google.oauth2.service_account import Credentials
 import pandas as pd
+import streamlit as st
 
 import json
 
@@ -42,14 +43,32 @@ def load_sheet_data(sheet_id, secrets):
             - pandas.DataFrame: A DataFrame containing the data from the Google Sheet.
             - gspread.models.Worksheet: The worksheet object representing the Google Sheet.
     """
-    creds = load_credentials(secrets)
-    client = gspread.authorize(creds)
-    sheet = client.open_by_key(sheet_id)
-    worksheet = sheet.sheet1
-    values_list = worksheet.get_all_values()
+    try:
+        creds = load_credentials(secrets)
+        client = gspread.authorize(creds)
+        sheet = client.open_by_key(sheet_id)
+        worksheet = sheet.sheet1
+        values_list = worksheet.get_all_values()
+        
+        if values_list:
+            df = pd.DataFrame(values_list[1:], columns=values_list[0])
+        else:
+            df = pd.DataFrame(columns=worksheet.row_values(1))
+            
+        return df, worksheet
     
-    if values_list:
-        df = pd.DataFrame(values_list[1:], columns=values_list[0])
-    else:
-        df = pd.DataFrame(columns=worksheet.row_values(1))
-    return df, worksheet
+    except gspread.exceptions.SpreadsheetNotFound:
+        st.error('Das angegebene Google Sheet konnte nicht gefunden werden. Überprüfen Sie die Sheet-ID und versuchen Sie es erneut.')
+        return pd.DataFrame(), None
+    
+    except gspread.exceptions.WorksheetNotFound:
+        st.error('Das angegebene Arbeitsblatt konnte nicht gefunden werden. Überprüfen Sie, ob das Arbeitsblatt existiert.')
+        return pd.DataFrame(), None
+    
+    except gspread.exceptions.APIError as api_error:
+        st.error(f'Es ist ein API-Fehler aufgetreten. Bitte versuchen Sie es später erneut.')
+        return pd.DataFrame(), None
+    
+    except gspread.exceptions.Exception as e:
+        st.error(f'Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.')
+        return pd.DataFrame(), None
