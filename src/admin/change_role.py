@@ -1,5 +1,7 @@
 import streamlit as st
 
+from uuid import uuid4
+
 from auth import update_config
 
 def change_role():
@@ -42,7 +44,7 @@ def change_role():
         available_roles = [role for role in ['admin', 'user'] if role != current_role]
         new_role = st.selectbox('Neue Rolle auswählen', options=available_roles, index=None)
         
-        if st.button('Rolle ändern'):
+        if st.button('Rolle ändern', key=uuid4()):
             if new_role is None:
                 st.warning('Wähle eine Rolle für den Benutzer aus.')
             elif new_role != current_role:

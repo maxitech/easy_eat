@@ -1,5 +1,7 @@
 import streamlit as st
 
+from uuid import uuid4
+
 from utils import search, delete_row
 
 
@@ -26,7 +28,7 @@ def handle_delete_user(df, worksheet):
         value_to_delete = search(df, delete_input)
         if not value_to_delete.empty:
             st.write(f'Wollen Sie den Benutzer: `{delete_input}` wirklich löschen?')
-            if st.button('Löschen'):    
+            if st.button('Löschen', key=uuid4()):    
                 delete_row(worksheet, delete_input, entity_type='user') 
         else:
             st.write('Kein User gefunden, bitte überprüfe deine Eingabe!')
