@@ -14,6 +14,7 @@ Click [here](https://easyeat.streamlit.app/) to access the demo.
    # Password
    P@ssw0rd123
    ```
+**Note**: If you reset the password, please revert it back to the default credentials afterward.
 
 ## ⚡️ Technologies Used
 - Python
