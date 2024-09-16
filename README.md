@@ -16,16 +16,25 @@ Click [here](https://easyeat.streamlit.app/) to access the demo.
    ```
 **Note**: If you reset the password, please revert it back to the default credentials afterward.
 
+## 🛡️ Admin Panel
+EasyEat includes an admin panel available to users with the **Admin** role. The panel provides a user-friendly interface to manage the recipe database and user accounts. Below are the key features:
+
+### Key Admin Features:
+- **Delete Recipes:** Admins can permanently remove recipes from the database, ensuring content management is controlled.
+- **Delete Users:** Admins have the ability to remove users from the platform if necessary.
+- **Change User Roles:** Admins can promote or demote users, assigning or removing the Admin role based on need.
+
+### Admin Panel Preview
+Here's a preview of the admin panel:
+
+![Admin Panel Screenshot](src/assets/easy_eat.png)
+
 ## ⚡️ Technologies Used
 - Python
 - Streamlit
 - Pandas
 - Google Sheets (Database)
 - Google Cloud Console (API Access Management)
-
-## 🛠️ Build Tools
-- [Streamlit Cloud](https://streamlit.io/cloud): For deploying and hosting the application.
-- [Google Cloud Console](https://console.cloud.google.com/): For managing API access to Google Sheets.
 
 ## 💡 What I Learned
 - **Python & Streamlit Development:** Gained deeper experience building web applications with Streamlit and integrating third-party libraries.
@@ -34,9 +43,12 @@ Click [here](https://easyeat.streamlit.app/) to access the demo.
 - **Collaborative Platform Development:** Built a system that handles multiple users interacting with the same recipe database, which helped me understand collaborative workflows in web apps.
 
 ## 🔮 Future Improvement Ideas
-- **Admin Controls for Deletion:** Restrict recipe deletion to admin users only.
 - **User-specific Recipe Collections:** Allow users to create their own collections or favorite recipes.
 - **Google Sheets API Rate Limits**: The app may experience occasional delays or errors when multiple users interact with the database simultaneously, due to Google Sheets API rate limits. This issue resolves automatically after a short period. An improvement to optimize API usage is planned in a future release.
+
+## 🛠️ Build Tools
+- [Streamlit Cloud](https://streamlit.io/cloud): For deploying and hosting the application.
+- [Google Cloud Console](https://console.cloud.google.com/): For managing API access to Google Sheets.
 
 ## 💭 Sources and Inspiration
 My understanding of building web apps with Streamlit and integrating external APIs was greatly improved by various resources:
