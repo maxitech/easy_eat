@@ -111,18 +111,12 @@ To run the project in your local environment, follow these steps:
 
    db_credentials = '''{your_downloaded_db_credentials.json}'''
    ```
-
-6. **Configure Local Development:**
-   For local development, you need to update the path to `config.yaml` in the `config.py` module located in the `utils` folder. Open `src/utils/config.py` and change the path to:
-   ```python
-   config_path = '../config.yaml'
-   ```
-7. **Navigate to the `src` Directory:**
+6. **Navigate to the `src` Directory:**
    ```bash
    cd src
    ```
-8. **Start the Local Development Server:** Run the Streamlit application:
+7. **Start the Local Development Server:** Run the Streamlit application:
    ```bash
    streamlit run main.py
    ```
-9. **Open** [http://localhost:5801](http://localhost:5801) (or the address shown in your console) in your web browser to view the app.
+8. **Open** [http://localhost:5801](http://localhost:5801) (or the address shown in your console) in your web browser to view the app.
