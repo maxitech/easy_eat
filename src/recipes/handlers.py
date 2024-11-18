@@ -93,6 +93,9 @@ def handle_add_recipe(worksheet):
         confirm_submit = st.checkbox("Ja, ich habe alles überprüft und möchte das Rezept abschicken.")
         submitted = st.form_submit_button('Hinzufügen')
         
+        if st.session_state['user_role'] == 'demo':
+            return
+        
         if submitted:
             if not confirm_submit:
                 st.error('Bitte bestätigen Sie, dass Sie alles überprüft haben.')

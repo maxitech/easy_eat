@@ -41,10 +41,10 @@ def change_role():
         current_role = config['credentials']['usernames'][selected_user]['role']
         st.write(f"Aktuelle Rolle von `{selected_user}`: `{current_role}`")
         
-        available_roles = [role for role in ['admin', 'user'] if role != current_role]
+        available_roles = [role for role in ['admin', 'user', 'demo'] if role != current_role]
         new_role = st.selectbox('Neue Rolle auswählen', options=available_roles, index=None)
-        
-        if st.button('Rolle ändern', key=uuid4()):
+
+        if st.button('Rolle ändern', key='change_role'):
             if new_role is None:
                 st.warning('Wähle eine Rolle für den Benutzer aus.')
             elif new_role != current_role:

@@ -44,7 +44,10 @@ def handle_authentication():
                 toggle_btn_session_state('show_pw_reset')
                 
             if st.session_state['show_pw_reset']:
-                reset_pw(authenticator, config, st.session_state['username'], worksheet)
+                if st.session_state['user_role'] != 'demo':
+                    reset_pw(authenticator, config, st.session_state['username'], worksheet)
+                else:
+                    st.sidebar.info('Im Demo-Account können Sie das Passwort nicht ändern! Erstellen Sie einen Account, um das Passwort zu ändern.')
                 
             update_config(config, st.session_state['username'], worksheet)  
             return True

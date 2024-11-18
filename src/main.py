@@ -30,11 +30,17 @@ def main():
             'Administration': [admin_panel]
         }
         st.sidebar.markdown("**Hinweis:** Sie haben die Rolle `Admin`.")
+        
+    elif st.session_state['user_role'] == 'demo':
+        pages = {
+            'App': [home_page, add_recipe],
+        }
+        st.sidebar.markdown("**Hinweis:** Sie haben die Rolle `Demo`. Einige Funktionen sind eingeschränkt oder nicht verfügbar!")
     else:
         pages = {
             'App': [home_page, add_recipe],
         }
-        st.sidebar.markdown("**Hinweis:** Sie haben derzeit die Rolle `User`. Bitte wenden Sie sich an den Administrator, wenn Sie Zugang zu weiteren Funktionen benötigen.")
+        st.sidebar.markdown("**Hinweis:** Sie haben die Rolle `User`. Einige Funktionen sind eingeschränkt oder nicht verfügbar!")
 
 
     # --- NAVIGATION SETUP ---
