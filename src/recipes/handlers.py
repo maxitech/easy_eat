@@ -20,7 +20,7 @@ def handle_search(df):
     Returns:
         None
     """
-    search_input = st.text_input('Suche ein Rezept:', help='Suchparameter: Gericht | Kategorie | Ernährungsweise | Dauer | Zutaten').strip()
+    search_input = st.text_input('Suche ein Rezept:', help='Suchparameter: Gericht | Zutaten').strip()
 
     if search_input:
         filtered_df = search(df, search_input)
